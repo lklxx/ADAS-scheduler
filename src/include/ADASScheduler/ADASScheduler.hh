@@ -1,3 +1,5 @@
+#include "schedule.hh"
+
 class ADASScheduler {
 public:
   ADASScheduler() {}
@@ -6,8 +8,10 @@ public:
     std::cout << input_data << std::endl;
   }
 
+  template <class Scheduler>
   void simulated_annealing(int exec_time) {
-    std::cout << exec_time << std::endl;
+    init_sol();
+    curr_sch = best_sch = Scheduler::schedule_synthesis(curr_sol);
   }
 
   void output_result(std::string output_file) {
@@ -15,5 +19,10 @@ public:
   }
 
 private:
+  void init_sol() { }
 
+private:
+  Solution curr_sol, best_sol;
+  Schedule curr_sch, best_sch;
+  int curr_cost, best_cost;
 };
