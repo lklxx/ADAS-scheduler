@@ -1,6 +1,8 @@
 #pragma once
 
 struct Task {
+  int index;
+
   // Input constraints
   int core;		// -1 if unspecified
   int release;
