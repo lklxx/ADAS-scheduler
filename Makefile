@@ -1,4 +1,4 @@
-INC=-Isrc/lib -Isrc/include
+INC=-Isrc/lib -Isrc/include/ADASScheduler
 
 .DEFAULT_GOAL := adas-schedule
 
