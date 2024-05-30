@@ -2,8 +2,8 @@
 #include "ADASScheduler.hh"
 
 int main(int argc, char *argv[]) {
-  cmdline::parser a;
-  a.parse_check(argc, argv);
+  cmdline::parser parser;
+  parser.parse_check(argc, argv);
 
   ADASScheduler scheduler;
 
