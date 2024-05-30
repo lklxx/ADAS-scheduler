@@ -22,6 +22,8 @@ struct Task {
 };
 
 struct TaskChain {
+  int index;
+
   // Input constraints
   std::vector<Task> tasks;
   int deadline;
