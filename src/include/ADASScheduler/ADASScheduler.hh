@@ -1,4 +1,6 @@
+#include <cassert>
 #include <fstream>
+#include <numeric>
 
 #include "schedule.hh"
 
@@ -76,7 +78,32 @@ public:
   }
 
 private:
-  void init_sol() { }
+  void init_sol() {
+    curr_sol.hyper_period = 1;
+    for (auto &t : curr_sol.tasks) {
+      curr_sol.hyper_period = std::lcm(curr_sol.hyper_period, t.period);
+    }
+
+    std::vector<int> core_util(curr_sol.core_num, 0);
+    for (auto &t : curr_sol.tasks) {
+      if (t.core == -1) {
+        continue;
+      }
+      core_util[t.core] += t.time * (curr_sol.hyper_period / t.period);
+      assert(core_util[t.core] <= curr_sol.hyper_period);
+    }
+    for (auto &t : curr_sol.tasks) {
+      if (t.core != -1) {
+        continue;
+      }
+      int min_util_core = std::distance(std::begin(core_util),
+                                        std::ranges::min_element(core_util));
+      t.core = min_util_core;
+      core_util[min_util_core] += t.time * (curr_sol.hyper_period / t.period);
+    }
+
+    print_sol(curr_sol);
+  }
 
 private:
   Solution curr_sol, best_sol;
