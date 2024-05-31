@@ -40,6 +40,8 @@ struct Solution {
   std::vector<TaskChain> task_chains;
   int core_num;		// 0 ~ core_num - 1
   float cost;		// only used in Schedule
+
+  int hyper_period;	// lcm of periods
 };
 
 typedef Solution Schedule;
