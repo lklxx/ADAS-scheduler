@@ -35,7 +35,7 @@ public:
       curr_sol.task_chains.push_back(tc);
     }
 
-    print_curr_sol();
+    print_sol(curr_sol);
     best_sol = curr_sol;
   }
 
@@ -64,13 +64,13 @@ public:
     std::cout << "], " << tc.deadline << ", " << tc.priority << ")\n";
   }
 
-  void print_curr_sol() {
+  void print_sol(Solution &sol) {
     std::cout << "Tasks:\n";
-    for (auto t : curr_sol.tasks) {
+    for (auto t : sol.tasks) {
       print_task(t);
     }
     std::cout << "\nTask Chains:\n";
-    for (auto tc : curr_sol.task_chains) {
+    for (auto tc : sol.task_chains) {
       print_task_chain(tc);
     }
   }
