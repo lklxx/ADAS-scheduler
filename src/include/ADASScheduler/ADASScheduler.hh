@@ -41,10 +41,10 @@ public:
     best_sol = curr_sol;
   }
 
-  template <class Scheduler>
-  void simulated_annealing(int exec_time) {
+  template <typename Scheduler>
+  void simulated_annealing(Scheduler scheduler, int exec_time) {
     init_sol();
-    curr_sch = best_sch = Scheduler::schedule_synthesis(curr_sol);
+    curr_sch = best_sch = scheduler(curr_sol);
   }
 
   void output_result(std::string output_file) {

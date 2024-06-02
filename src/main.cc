@@ -1,6 +1,6 @@
 #include "cmdline.h"
 #include "ADASScheduler.hh"
-#include "SecondaryScheduler.hh"
+#include "EDFScheduler.hh"
 
 int main(int argc, char *argv[]) {
   cmdline::parser parser;
@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 
   ADASScheduler scheduler;
   scheduler.parse_input_data(parser.get<std::string>("input"));
-  scheduler.simulated_annealing<SecondaryScheduler>(parser.get<int>("time"));
+  scheduler.simulated_annealing(EDFScheduler, parser.get<int>("time"));
   scheduler.output_result(parser.get<std::string>("output"));
 
   return 0;
