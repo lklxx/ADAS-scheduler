@@ -75,13 +75,17 @@ public:
     for (auto tc : sol.task_chains) {
       print_task_chain(tc);
     }
+    std::cout << "\nhyper period: " << sol.hyper_period;
+    std::cout << "\nmax offset: " << sol.max_offset << "\n\n";
   }
 
 private:
   void init_sol() {
     curr_sol.hyper_period = 1;
+    curr_sol.max_offset = 0;
     for (auto &t : curr_sol.tasks) {
       curr_sol.hyper_period = std::lcm(curr_sol.hyper_period, t.period);
+      curr_sol.max_offset = std::max(curr_sol.max_offset, t.offset);
     }
 
     std::vector<int> core_util(curr_sol.core_num, 0);

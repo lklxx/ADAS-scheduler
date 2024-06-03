@@ -4,9 +4,9 @@ struct Task {
   int index;
 
   // Input constraints
-  int core;		// -1 if unspecified
+  int core;			// -1 if unspecified
   int release;
-  int offset;		// only used for init_sol()
+  int offset;			// only used for init_sol()
   int time;
   int period;
   int deadline;
@@ -30,7 +30,7 @@ struct TaskChain {
   float priority;
 
   // Schedule result
-  int period;		// lcm of task periods
+  int period;			// lcm of task periods
   std::vector<int> start_time;
   std::vector<int> finish_time;
 };
@@ -38,10 +38,11 @@ struct TaskChain {
 struct Solution {
   std::vector<Task> tasks;
   std::vector<TaskChain> task_chains;
-  int core_num;		// 0 ~ core_num - 1
-  float cost;		// only used in Schedule
+  int core_num;			// 0 ~ core_num - 1
+  float cost;			// only used in Schedule
 
-  int hyper_period;	// lcm of periods
+  int hyper_period = -1;	// lcm of periods
+  int max_offset = -1;
 };
 
 typedef Solution Schedule;
