@@ -95,6 +95,7 @@ Schedule EDFScheduler(Solution sol) {
   }
 
   print_logs(sch.logs);
+  visualize_logs(sch, std::cout);
 
   return sch;
 }
