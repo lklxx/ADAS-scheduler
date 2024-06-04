@@ -1,7 +1,5 @@
 #pragma once
 
-#include "log.hh"
-
 struct Task {
   int index;
 
@@ -36,6 +34,15 @@ struct TaskChain {
   std::vector<int> start_time;
   std::vector<int> finish_time;
 };
+
+struct TimeSegment {
+  TimeSegment(int tid, int from, int to) : tid(tid), from(from), to(to) {}
+  int tid;
+  int from;
+  int to;
+};
+
+using Log = std::vector<TimeSegment>;
 
 struct Solution {
   std::vector<Task> tasks;

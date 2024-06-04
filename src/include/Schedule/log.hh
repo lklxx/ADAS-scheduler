@@ -1,13 +1,4 @@
-#pragma once
-
-struct TimeSegment {
-  TimeSegment(int tid, int from, int to) : tid(tid), from(from), to(to) {}
-  int tid;
-  int from;
-  int to;
-};
-
-using Log = std::vector<TimeSegment>;
+#include "schedule.hh"
 
 void print_logs(std::vector<Log> &logs) {
   for (size_t core = 0; core < logs.size(); core++) {
