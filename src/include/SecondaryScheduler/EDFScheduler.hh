@@ -27,6 +27,8 @@ Schedule EDFScheduler(Solution sol) {
   int task_num = sch.tasks.size();
   std::vector<int> exec_time(task_num);
   std::vector<int> deadline(task_num);
+  std::vector<std::queue<int>> remain_time(task_num);
+  std::vector<std::queue<int>> next_deadline(task_num);
 
   for (int core = 0; core < sch.core_num; core++) {
     std::vector<Task> core_tasks;
@@ -59,8 +61,13 @@ Schedule EDFScheduler(Solution sol) {
         events.pop();
         int tid = e.tid;
         Task t = sch.tasks[tid];
-        exec_time[tid] = t.time; // TODO: what if exec_time[tid] != 0 ?
-        deadline[tid] = e.time - t.offset + t.deadline;
+        if (exec_time[tid] == 0) {
+          deadline[tid] = e.time - t.offset + t.deadline;
+        } else {
+          remain_time[tid].push(remain_time[tid].empty() ? exec_time[tid] : t.time);
+          next_deadline[tid].push(e.time - t.offset + t.deadline);
+        }
+        exec_time[tid] += t.time;
 
         if (events.empty()) {
           break;
@@ -84,7 +91,19 @@ Schedule EDFScheduler(Solution sol) {
       int to = events.empty() ? INT_MAX : events.top().time;
       if (et != -1) {
         to = std::min(to, from + exec_time[et]);
-        exec_time[et] -= to - from;
+        int exec = to - from;
+        exec_time[et] -= exec;
+        while (!remain_time[et].empty()) {
+          if (exec >= remain_time[et].front()) {
+            exec -= remain_time[et].front();
+            remain_time[et].pop();
+            deadline[et] = next_deadline[et].front();
+            next_deadline[et].pop();
+          } else {
+            remain_time[et].front() -= exec;
+            break;
+          }
+        }
       }
       log.push_back(TimeSegment(et, from, to));
       from = to;
