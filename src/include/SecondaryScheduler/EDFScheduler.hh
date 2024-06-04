@@ -49,7 +49,7 @@ Schedule EDFScheduler(Solution sol) {
     /* Start Simulation */
     std::fill(exec_time.begin(), exec_time.end(), 0);
     std::fill(deadline.begin(), deadline.end(), INT_MAX);
-    std::vector<TimeSegment> sch_log;
+    Log log;
     int from = 0;
 
     while (!events.empty()) {
@@ -86,13 +86,13 @@ Schedule EDFScheduler(Solution sol) {
         to = std::min(to, from + exec_time[et]);
         exec_time[et] -= to - from;
       }
-      sch_log.push_back(TimeSegment(et, from, to));
+      log.push_back(TimeSegment(et, from, to));
       from = to;
     }
 
     /* End Simulation */
     std::cout << "Core " << core << std::endl;
-    print_log(sch_log);
+    print_log(log);
   }
 
   return sch;

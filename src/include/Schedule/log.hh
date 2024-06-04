@@ -1,3 +1,5 @@
+#pragma once
+
 struct TimeSegment {
   TimeSegment(int tid, int from, int to) : tid(tid), from(from), to(to) {}
   int tid;
@@ -5,7 +7,9 @@ struct TimeSegment {
   int to;
 };
 
-void print_log(std::vector<TimeSegment> &log) {
+using Log = std::vector<TimeSegment>;
+
+void print_log(Log &log) {
   for (auto ts : log) {
     if (ts.tid == -1) {
       std::cout << "Idle";

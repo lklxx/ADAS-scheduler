@@ -1,5 +1,7 @@
 #pragma once
 
+#include "log.hh"
+
 struct Task {
   int index;
 
@@ -43,6 +45,7 @@ struct Solution {
 
   int hyper_period = -1;	// lcm of periods
   int max_offset = -1;
+  std::vector<Log> logs;	// only used in Schedule
 };
 
 typedef Solution Schedule;
