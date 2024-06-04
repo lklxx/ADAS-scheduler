@@ -91,9 +91,10 @@ Schedule EDFScheduler(Solution sol) {
     }
 
     /* End Simulation */
-    std::cout << "Core " << core << std::endl;
-    print_log(log);
+    sch.logs.push_back(log);
   }
+
+  print_logs(sch.logs);
 
   return sch;
 }
