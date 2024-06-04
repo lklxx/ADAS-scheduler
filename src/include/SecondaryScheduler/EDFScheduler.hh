@@ -1,6 +1,7 @@
 #include <climits>
 #include <queue>
 
+#include "log.hh"
 #include "schedule.hh"
 
 struct Event {
@@ -19,25 +20,6 @@ struct EventPrior {
 };
 
 using EventQueue = std::priority_queue<Event, std::vector<Event>, EventPrior>;
-
-struct TimeSegment {
-  TimeSegment(int tid, int from, int to) : tid(tid), from(from), to(to) {}
-  int tid;	// -1 for idle
-  int from;
-  int to;
-};
-
-static void print_log(std::vector<TimeSegment> &log) {
-  for (auto ts : log) {
-    if (ts.tid == -1) {
-      std::cout << "Idle";
-    } else {
-      std::cout << "Task " << ts.tid;
-    }
-    std::cout << "\tfrom " << ts.from << "\tto " << ts.to << std::endl;
-  }
-  std::cout << std::endl;
-}
 
 Schedule EDFScheduler(Solution sol) {
   Schedule sch = sol;
