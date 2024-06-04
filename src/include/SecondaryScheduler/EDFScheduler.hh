@@ -47,6 +47,7 @@ Schedule EDFScheduler(Solution sol) {
         start += t.period;
       }
     }
+    events.push(Event(-1, INT_MAX));
 
     /* Start Simulation */
     std::fill(exec_time.begin(), exec_time.end(), 0);
@@ -54,7 +55,7 @@ Schedule EDFScheduler(Solution sol) {
     Log log;
     int from = 0;
 
-    while (!events.empty()) {
+    while (true) {
       /* Find all candidate tasks  */
       while (events.top().time == from) {
         Event e = events.top();
@@ -104,6 +105,8 @@ Schedule EDFScheduler(Solution sol) {
             break;
           }
         }
+      } else if (to == INT_MAX) {
+        break;
       }
       log.push_back(TimeSegment(et, from, to));
       from = to;
