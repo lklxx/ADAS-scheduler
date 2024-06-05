@@ -253,6 +253,12 @@ private:
     }
   }
 
+  static int rand_num(int n /* inclusive */, int m /* inclusive */) {
+    static std::knuth_b rand_engine;
+    std::uniform_int_distribution<int> rand(n, m);
+    return rand(rand_engine);
+  }
+
   static Schedule adjust_deadline(Schedule &sch) {
     Schedule new_sch;
     return new_sch;
@@ -269,9 +275,7 @@ private:
   }
 
   Schedule generate_neighbor(Schedule &sch) {
-    static std::knuth_b rand_engine;
-    static std::uniform_int_distribution<int> rand_method(0, methods.size() - 1);
-    int method = rand_method(rand_engine);
+    int method = rand_num(0, methods.size() - 1);
     return methods[method](sch);
   }
 
