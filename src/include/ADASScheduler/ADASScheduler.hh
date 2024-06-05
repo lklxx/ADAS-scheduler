@@ -282,7 +282,24 @@ private:
   }
 
   static Schedule swap_tasks(Schedule &sch) {
-    Schedule new_sch;
+    Schedule new_sch = sch;
+    std::vector<int> candidate_tid;
+    for (auto t : new_sch.tasks) {
+      if (t.core == -1) {
+        candidate_tid.push_back(t.index);
+      }
+    }
+    int tid1 = candidate_tid[rand_num(0, candidate_tid.size() - 1)];
+    int tid2 = candidate_tid[rand_num(0, candidate_tid.size() - 1)];
+    while (tid2 == tid1) {
+      tid2 = candidate_tid[rand_num(0, candidate_tid.size() - 1)];
+    }
+    new_sch.tasks[tid1].sch_core = sch.tasks[tid2].sch_core;
+    new_sch.tasks[tid1].sch_offset = new_sch.tasks[tid1].offset;
+    new_sch.tasks[tid1].sch_deadline = new_sch.tasks[tid1].deadline;
+    new_sch.tasks[tid2].sch_core = sch.tasks[tid1].sch_core;
+    new_sch.tasks[tid2].sch_offset = new_sch.tasks[tid2].offset;
+    new_sch.tasks[tid2].sch_deadline = new_sch.tasks[tid2].deadline;
     return new_sch;
   }
 
