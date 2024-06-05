@@ -1,4 +1,5 @@
 #include <cassert>
+#include <climits>
 #include <fstream>
 #include <numeric>
 
@@ -18,7 +19,7 @@ public:
       Task t;
       t.index = i;
       ifs >> t.core >> t.release >> t.offset
-          >> t.time >> t.period >> t.deadline;
+          >> t.time >> t.period >> t.deadline >> t.jitter;
       curr_sol.tasks.push_back(t);
     }
 
@@ -45,6 +46,7 @@ public:
   void simulated_annealing(Scheduler scheduler, int exec_time) {
     init_sol();
     curr_sch = best_sch = scheduler(curr_sol);
+    calculate_cost(curr_sch);
   }
 
   void output_result(std::string output_file) {
@@ -109,8 +111,147 @@ private:
     print_sol(curr_sol);
   }
 
+  void calculate_cost(Schedule &sch) {
+    std::vector<Log> task_logs(sch.tasks.size());
+
+    for (auto log : sch.logs) {
+      for (auto ts : log) {
+        if (ts.tid != -1) {
+          task_logs[ts.tid].push_back(ts);
+        }
+      }
+    }
+
+    for (size_t tid = 0; tid < sch.tasks.size(); tid++) {
+      int cur = 0;
+      for (auto ts : task_logs[tid]) {
+        if (cur == 0) {
+          sch.tasks[tid].start_time.push_back(ts.from);
+        }
+        int exec = ts.to - ts.from;
+        int time = sch.tasks[tid].time;
+        int from = ts.from;
+        while (cur + exec >= time) {
+          int t = time - cur;
+          sch.tasks[tid].finish_time.push_back(from + t);
+          from += t;
+          exec -= t;
+          cur = 0;
+          if (exec > 0) {
+            sch.tasks[tid].start_time.push_back(from);
+          }
+        }
+        cur += exec;
+      }
+
+      std::cout << "Task " << tid << ":\n";
+      for (size_t i = 0; i < sch.tasks[tid].start_time.size(); i++) {
+        std::cout << "(" << sch.tasks[tid].start_time[i]
+                  << ", " << sch.tasks[tid].finish_time[i] << "), ";
+      }
+      std::cout << std::endl;
+    }
+
+    for (auto t : sch.tasks) {
+      int max = 0;
+      int min = INT_MAX;
+
+      for (size_t i = 0; i < t.start_time.size(); i++) {
+        int offset = t.start_time[i] - t.period * i;
+	max = std::max(max, offset);
+	min = std::min(min, offset);
+      }
+      t.sch_jitter = max - min;
+
+      max = 0;
+      min = INT_MAX;
+      for (size_t i = 0; i < t.finish_time.size(); i++) {
+        int offset = t.finish_time[i] - t.period * i;
+        max = std::max(max, offset);
+        min = std::min(min, offset);
+      }
+      t.sch_jitter = std::max(t.sch_jitter, max - min);
+      if (max > t.deadline) {
+        float violation = std::min(max - t.deadline, t.deadline);
+        sch.cost.deadline_t += violation / t.deadline / sch.tasks.size();
+      }
+      if (t.sch_jitter > 0) {
+        t.sch_jitter = std::min(t.sch_jitter, t.jitter);
+        sch.cost.jitter += static_cast<float>(t.sch_jitter) / t.jitter / sch.tasks.size();
+      }
+    }
+
+    sync_tasks(sch);
+
+    for (auto tc : sch.task_chains) {
+      auto first = tc.tasks[0];
+      std::vector<int> next(sch.tasks.size(), 0);
+
+      for (size_t i = 0; i < first.start_time.size() / 2; i++) {
+        int start = first.start_time[i];
+        tc.start_time.push_back(start);
+        int cur = start;
+        for (auto t : tc.tasks) {
+          int tid = t.index;
+          while (sch.tasks[tid].start_time[next[tid]] < cur) {
+            next[tid]++;
+            if (static_cast<size_t>(next[tid]) == sch.tasks[tid].start_time.size()) {
+              sch.tasks[tid].start_time.push_back(INT_MAX);
+              sch.tasks[tid].finish_time.push_back(INT_MAX);
+              break;
+            }
+          }
+          cur = sch.tasks[tid].finish_time[next[tid]];
+        }
+        tc.finish_time.push_back(cur);
+      }
+
+      std::cout << "Task Chain " << tc.index << ":\n";
+      for (size_t i = 0; i < tc.start_time.size(); i++) {
+        std::cout << "(" << tc.start_time[i]
+                  << ", " << tc.finish_time[i] << "), ";
+      }
+      std::cout << std::endl;
+
+      int max_latency = 0;
+      for (size_t i = 0; i < tc.start_time.size(); i++) {
+        max_latency = std::max(max_latency, tc.finish_time[i] - tc.start_time[i]);
+      }
+      if (max_latency > tc.deadline) {
+        float violation = std::min(max_latency - tc.deadline, tc.deadline);
+        sch.cost.deadline_tc += violation / tc.deadline / sch.task_chains.size();
+      } else {
+        sch.cost.latency += tc.priority * max_latency / tc.deadline / sch.task_chains.size();
+      }
+    }
+
+    sch.cost.final_cost = w1 + sch.cost.deadline_tc * w2 +
+                          sch.cost.deadline_t * w3 + sch.cost.jitter * w4;
+    if (sch.cost.final_cost == w1) {
+      sch.cost.final_cost *= sch.cost.latency;
+    }
+
+    std::cout << "cost: " << std::endl;
+    std::cout << "  latency: " << sch.cost.latency << std::endl;
+    std::cout << "  deadline_t: " << sch.cost.deadline_t << std::endl;
+    std::cout << "  deadline_tc: " << sch.cost.deadline_tc << std::endl;
+    std::cout << "  jitter: " << sch.cost.jitter << std::endl;
+    std::cout << "  final_cost: " << sch.cost.final_cost << std::endl;
+  }
+
+  void sync_tasks(Schedule &sch) {
+    for (auto &tc : sch.task_chains) {
+      for (auto &t : tc.tasks) {
+        t = sch.tasks[t.index];
+      }
+    }
+  }
+
 private:
   Solution curr_sol, best_sol;
   Schedule curr_sch, best_sch;
-  int curr_cost, best_cost;
+  float w1 = 10000;
+  float w2 = 40000;
+  float w3 = 10000;
+  float w4 = 60000;
 };

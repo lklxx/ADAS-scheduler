@@ -10,6 +10,7 @@ struct Task {
   int time;
   int period;
   int deadline;
+  int jitter;
 
   // Solution result
   int sch_core;
@@ -18,7 +19,7 @@ struct Task {
   // Schedule result
   std::vector<int> start_time;
   std::vector<int> finish_time;
-  int jitter;
+  int sch_jitter;
 };
 
 struct TaskChain {
@@ -48,7 +49,13 @@ struct Solution {
   std::vector<Task> tasks;
   std::vector<TaskChain> task_chains;
   int core_num;			// 0 ~ core_num - 1
-  float cost;			// only used in Schedule
+  struct {
+    float latency = 0;
+    float deadline_t = 0;
+    float deadline_tc = 0;
+    float jitter = 0;
+    float final_cost = 0;
+  } cost;			// only used in Schedule
 
   int hyper_period = -1;	// lcm of periods
   int max_offset = -1;
