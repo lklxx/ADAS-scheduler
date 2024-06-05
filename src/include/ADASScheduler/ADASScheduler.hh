@@ -4,6 +4,7 @@
 #include <numeric>
 #include <random>
 
+#include "log.hh"
 #include "sa.hh"
 #include "schedule.hh"
 
@@ -52,6 +53,8 @@ public:
       return calculate_cost(sch);
     };
     best_sch = simulated_annealing(curr_sch, schedule_and_calculate_cost, generate_neighbor);
+    visualize_logs(best_sch, std::cout);
+    std::cout << "min cost: " << best_sch.cost.final_cost << std::endl;
   }
 
   void output_result(std::string output_file) {
