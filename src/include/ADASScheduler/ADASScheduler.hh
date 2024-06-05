@@ -278,9 +278,32 @@ private:
     return new_sch;
   }
 
+  Schedule reset_sch(Schedule sch) {
+    sch.max_offset = 0;
+    for (auto t : sch.tasks) {
+      t.start_time.clear();
+      t.finish_time.clear();
+      sch.max_offset = std::max(sch.max_offset, t.sch_offset);
+    }
+    sync_tasks(sch);
+    for (auto tc : sch.task_chains) {
+      tc.start_time.clear();
+      tc.finish_time.clear();
+    }
+    sch.cost.latency = 0;
+    sch.cost.deadline_t = 0;
+    sch.cost.deadline_tc = 0;
+    sch.cost.jitter = 0;
+    sch.cost.final_cost = 0;
+    sch.logs.clear();
+    sch.core_violations.clear();
+    sch.jitter_violations = 0;
+    return sch;
+  }
+
   Schedule generate_neighbor(Schedule &sch) {
     int method = rand_num(0, methods.size() - 1);
-    return methods[method](sch);
+    return reset_sch(methods[method](sch));
   }
 
 private:
