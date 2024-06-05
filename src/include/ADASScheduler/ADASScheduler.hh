@@ -45,11 +45,13 @@ public:
   }
 
   template <typename Scheduler>
-  void simulated_annealing(Scheduler scheduler, int exec_time) {
+  void find_optimal_schedule(Scheduler scheduler, int exec_time) {
     init_sch();
-    curr_sch = scheduler(curr_sch);
-    calculate_cost(curr_sch);
-    best_sch = curr_sch;
+    auto schedule_and_calculate_cost = [&](Schedule& sch) {
+      sch = scheduler(sch);
+      return calculate_cost(sch);
+    };
+    best_sch = simulated_annealing(curr_sch, schedule_and_calculate_cost, generate_neighbor);
   }
 
   void output_result(std::string output_file) {
@@ -250,7 +252,7 @@ private:
     return sch.cost.final_cost;
   }
 
-  void sync_tasks(Schedule &sch) {
+  static void sync_tasks(Schedule &sch) {
     for (auto &tc : sch.task_chains) {
       for (auto &t : tc.tasks) {
         t = sch.tasks[t.index];
@@ -335,7 +337,7 @@ private:
     return new_sch;
   }
 
-  Schedule reset_sch(Schedule sch) {
+  static Schedule reset_sch(Schedule sch) {
     sch.max_offset = 0;
     for (auto t : sch.tasks) {
       t.start_time.clear();
@@ -358,7 +360,7 @@ private:
     return sch;
   }
 
-  Schedule generate_neighbor(Schedule &sch) {
+  static Schedule generate_neighbor(Schedule &sch) {
     int method = rand_num(0, methods.size() - 1);
     while (sch.jitter_violations == 0 && method == 0) {
       method = rand_num(0, methods.size() - 1);
@@ -373,7 +375,7 @@ private:
   float w3 = 10000;
   float w4 = 60000;
   using Method = Schedule(*)(Schedule&);
-  std::array<Method, 3> methods = {
+  static constexpr std::array<Method, 3> methods = {
     &adjust_deadline,
     &swap_tasks,
     &adjust_offset
