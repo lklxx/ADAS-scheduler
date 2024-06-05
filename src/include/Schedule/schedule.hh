@@ -62,4 +62,5 @@ struct Schedule {
   int max_offset = -1;
   std::vector<Log> logs;
   std::vector<int> core_violations;
+  int jitter_violations = 0;
 };

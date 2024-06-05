@@ -187,6 +187,7 @@ private:
         t.sch_jitter = std::min(t.sch_jitter, t.jitter);
         sch.cost.jitter += static_cast<float>(t.sch_jitter) / t.jitter / sch.tasks.size();
         sch.core_violations[t.sch_core]++;
+        sch.jitter_violations++;
       }
     }
 
