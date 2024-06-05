@@ -15,6 +15,7 @@ struct Task {
   // Solution result
   int sch_core;
   int sch_offset;
+  int sch_deadline;
 
   // Schedule result
   std::vector<int> start_time;

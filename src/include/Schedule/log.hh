@@ -77,7 +77,7 @@ void visualize_logs(Schedule &sch, std::ostream &out) {
   std::vector<Log> task_logs(sch.tasks.size());
 
   for (auto t : sch.tasks) {
-    tid_lists[t.core].push_back(t.index);
+    tid_lists[t.sch_core].push_back(t.index);
   }
 
   for (auto log : sch.logs) {

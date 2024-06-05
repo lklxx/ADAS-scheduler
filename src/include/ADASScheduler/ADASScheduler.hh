@@ -56,7 +56,7 @@ public:
   void print_task(Task &t) {
     std::cout << "task " << t.index << ": (";
     std::cout << t.core << ", " << t.release << ", " << t.offset << ", "
-              << t.time << ", " << t.period << ", " << t.deadline << ")\n";
+              << t.time << ", " << t.period << ", " << t.deadline << "," << t.jitter << ")\n";
   }
 
   void print_task_chain(TaskChain &tc) {
@@ -88,23 +88,26 @@ private:
     for (auto &t : curr_sol.tasks) {
       curr_sol.hyper_period = std::lcm(curr_sol.hyper_period, t.period);
       curr_sol.max_offset = std::max(curr_sol.max_offset, t.offset);
+      t.sch_core = t.core;
+      t.sch_offset = t.offset;
+      t.sch_deadline = t.deadline;
     }
 
     std::vector<int> core_util(curr_sol.core_num, 0);
     for (auto &t : curr_sol.tasks) {
-      if (t.core == -1) {
+      if (t.sch_core == -1) {
         continue;
       }
-      core_util[t.core] += t.time * (curr_sol.hyper_period / t.period);
-      assert(core_util[t.core] <= curr_sol.hyper_period);
+      core_util[t.sch_core] += t.time * (curr_sol.hyper_period / t.period);
+      assert(core_util[t.sch_core] <= curr_sol.hyper_period);
     }
     for (auto &t : curr_sol.tasks) {
-      if (t.core != -1) {
+      if (t.sch_core != -1) {
         continue;
       }
       int min_util_core = std::distance(std::begin(core_util),
                                         std::ranges::min_element(core_util));
-      t.core = min_util_core;
+      t.sch_core = min_util_core;
       core_util[min_util_core] += t.time * (curr_sol.hyper_period / t.period);
     }
 

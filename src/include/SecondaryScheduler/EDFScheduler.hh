@@ -33,7 +33,7 @@ Schedule EDFScheduler(Solution sol) {
   for (int core = 0; core < sch.core_num; core++) {
     std::vector<Task> core_tasks;
     for (auto t : sch.tasks) {
-      if (t.core == core) {
+      if (t.sch_core == core) {
         core_tasks.push_back(t);
       }
     }
@@ -41,7 +41,7 @@ Schedule EDFScheduler(Solution sol) {
     EventQueue events;
     int sim_length = sch.hyper_period * 2 + sch.max_offset;
     for (auto t : core_tasks) {
-      int start = t.offset;
+      int start = t.sch_offset;
       while (start < sim_length) {
         events.push(Event(t.index, start));
         start += t.period;
@@ -63,10 +63,10 @@ Schedule EDFScheduler(Solution sol) {
         int tid = e.tid;
         Task t = sch.tasks[tid];
         if (exec_time[tid] == 0) {
-          deadline[tid] = e.time - t.offset + t.deadline;
+          deadline[tid] = e.time - t.sch_offset + t.sch_deadline;
         } else {
           remain_time[tid].push(remain_time[tid].empty() ? exec_time[tid] : t.time);
-          next_deadline[tid].push(e.time - t.offset + t.deadline);
+          next_deadline[tid].push(e.time - t.sch_offset + t.sch_deadline);
         }
         exec_time[tid] += t.time;
 
