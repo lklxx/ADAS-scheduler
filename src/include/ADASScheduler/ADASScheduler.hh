@@ -261,7 +261,8 @@ private:
   }
 
   static int rand_num(int n /* inclusive */, int m /* inclusive */) {
-    static std::knuth_b rand_engine;
+    static std::random_device dev;
+    static std::knuth_b rand_engine(dev());
     std::uniform_int_distribution<int> rand(n, m);
     return rand(rand_engine);
   }
