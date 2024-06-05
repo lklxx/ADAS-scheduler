@@ -21,7 +21,7 @@ struct EventPrior {
 
 using EventQueue = std::priority_queue<Event, std::vector<Event>, EventPrior>;
 
-Schedule EDFScheduler(Schedule sch) {
+void EDFScheduler(Schedule &sch) {
   int task_num = sch.tasks.size();
   std::vector<int> exec_time(task_num);
   std::vector<int> deadline(task_num);
@@ -116,6 +116,4 @@ Schedule EDFScheduler(Schedule sch) {
 
   print_logs(sch.logs);
   visualize_logs(sch, std::cout);
-
-  return sch;
 }

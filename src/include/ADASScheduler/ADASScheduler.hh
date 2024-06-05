@@ -48,7 +48,7 @@ public:
   void find_optimal_schedule(Scheduler scheduler, int exec_time) {
     init_sch();
     auto schedule_and_calculate_cost = [&](Schedule& sch) {
-      sch = scheduler(sch);
+      scheduler(sch);
       return calculate_cost(sch);
     };
     best_sch = simulated_annealing(curr_sch, schedule_and_calculate_cost, generate_neighbor);
@@ -161,7 +161,7 @@ private:
       std::cout << std::endl;
     }
 
-    for (auto t : sch.tasks) {
+    for (auto &t : sch.tasks) {
       int max = 0;
       int min = INT_MAX;
 
@@ -195,7 +195,7 @@ private:
 
     sync_tasks(sch);
 
-    for (auto tc : sch.task_chains) {
+    for (auto &tc : sch.task_chains) {
       auto first = tc.tasks[0];
       std::vector<int> next(sch.tasks.size(), 0);
 
@@ -339,13 +339,13 @@ private:
 
   static Schedule reset_sch(Schedule sch) {
     sch.max_offset = 0;
-    for (auto t : sch.tasks) {
+    for (auto &t : sch.tasks) {
       t.start_time.clear();
       t.finish_time.clear();
       sch.max_offset = std::max(sch.max_offset, t.sch_offset);
     }
     sync_tasks(sch);
-    for (auto tc : sch.task_chains) {
+    for (auto &tc : sch.task_chains) {
       tc.start_time.clear();
       tc.finish_time.clear();
     }
