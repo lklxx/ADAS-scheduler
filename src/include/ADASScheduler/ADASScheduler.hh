@@ -267,7 +267,10 @@ private:
     return rand(rand_engine);
   }
 
-  static Schedule adjust_deadline(Schedule &sch) {
+  static bool adjust_deadline(Schedule &sch) {
+    if (sch.jitter_violations == 0) {
+      return false;
+    }
     Schedule new_sch = sch;
     std::vector<int> candidate_tid;
     for (auto t : new_sch.tasks) {
@@ -282,16 +285,21 @@ private:
     while (new_sch.tasks[tid].sch_deadline == orig_deadline) {
       new_sch.tasks[tid].sch_deadline = rand_num(min_deadline, max_deadline);
     }
-    return new_sch;
+    //std::cout << "adjust deadline of task " << tid << " to " << new_sch.tasks[tid].sch_deadline << std::endl;
+    sch = new_sch;
+    return true;
   }
 
-  static Schedule swap_tasks(Schedule &sch) {
+  static bool swap_tasks(Schedule &sch) {
     Schedule new_sch = sch;
     std::vector<int> candidate_tid;
     for (auto t : new_sch.tasks) {
       if (t.core == -1) {
         candidate_tid.push_back(t.index);
       }
+    }
+    if (candidate_tid.size() < 2) {
+      return false;
     }
     int tid1 = candidate_tid[rand_num(0, candidate_tid.size() - 1)];
     int tid2 = candidate_tid[rand_num(0, candidate_tid.size() - 1)];
@@ -304,10 +312,12 @@ private:
     new_sch.tasks[tid2].sch_core = sch.tasks[tid1].sch_core;
     new_sch.tasks[tid2].sch_offset = new_sch.tasks[tid2].offset;
     new_sch.tasks[tid2].sch_deadline = new_sch.tasks[tid2].deadline;
-    return new_sch;
+    //std::cout << "swap task " << tid1 << " and task " << tid2 << std::endl;
+    sch = new_sch;
+    return true;
   }
 
-  static Schedule adjust_offset(Schedule &sch) {
+  static bool adjust_offset(Schedule &sch) {
     Schedule new_sch = sch;
     int max_violations = 0;
     for (int core = 0; core < new_sch.core_num; core++) {
@@ -335,7 +345,9 @@ private:
     while (new_sch.tasks[tid].sch_offset == orig_offset) {
       new_sch.tasks[tid].sch_offset = rand_num(min_offset, max_offset);
     }
-    return new_sch;
+    //std::cout << "adjust offset of task " << tid << " to " << new_sch.tasks[tid].sch_offset << std::endl;
+    sch = new_sch;
+    return true;
   }
 
   static Schedule reset_sch(Schedule sch) {
@@ -362,11 +374,8 @@ private:
   }
 
   static Schedule generate_neighbor(Schedule &sch) {
-    int method = rand_num(0, methods.size() - 1);
-    while (sch.jitter_violations == 0 && method == 0) {
-      method = rand_num(0, methods.size() - 1);
-    }
-    return reset_sch(methods[method](sch));
+    while (!methods[rand_num(0, methods.size() - 1)](sch));
+    return reset_sch(sch);
   }
 
 private:
@@ -375,7 +384,7 @@ private:
   float w2 = 40000;
   float w3 = 10000;
   float w4 = 60000;
-  using Method = Schedule(*)(Schedule&);
+  using Method = bool(*)(Schedule&);
   static constexpr std::array<Method, 3> methods = {
     &adjust_deadline,
     &swap_tasks,
