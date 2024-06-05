@@ -3,6 +3,7 @@
 #include <fstream>
 #include <numeric>
 
+#include "sa.hh"
 #include "schedule.hh"
 
 class ADASScheduler {
