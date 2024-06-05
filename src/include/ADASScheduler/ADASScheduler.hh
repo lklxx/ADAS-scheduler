@@ -52,7 +52,7 @@ public:
       scheduler(sch);
       return calculate_cost(sch);
     };
-    best_sch = simulated_annealing(curr_sch, schedule_and_calculate_cost, generate_neighbor);
+    best_sch = simulated_annealing(curr_sch, schedule_and_calculate_cost, generate_neighbor, exec_time);
     visualize_logs(best_sch, std::cout);
     std::cout << "min cost: " << best_sch.cost.final_cost << std::endl;
   }
