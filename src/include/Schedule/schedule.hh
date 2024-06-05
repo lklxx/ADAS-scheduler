@@ -6,7 +6,7 @@ struct Task {
   // Input constraints
   int core;			// -1 if unspecified
   int release;
-  int offset;			// only used for init_sol()
+  int offset;			// only used for init_sch()
   int time;
   int period;
   int deadline;
@@ -46,7 +46,7 @@ struct TimeSegment {
 
 using Log = std::vector<TimeSegment>;
 
-struct Solution {
+struct Schedule {
   std::vector<Task> tasks;
   std::vector<TaskChain> task_chains;
   int core_num;			// 0 ~ core_num - 1
@@ -56,11 +56,9 @@ struct Solution {
     float deadline_tc = 0;
     float jitter = 0;
     float final_cost = 0;
-  } cost;			// only used in Schedule
+  } cost;
 
   int hyper_period = -1;	// lcm of periods
   int max_offset = -1;
-  std::vector<Log> logs;	// only used in Schedule
+  std::vector<Log> logs;
 };
-
-typedef Solution Schedule;

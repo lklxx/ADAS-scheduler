@@ -21,9 +21,7 @@ struct EventPrior {
 
 using EventQueue = std::priority_queue<Event, std::vector<Event>, EventPrior>;
 
-Schedule EDFScheduler(Solution sol) {
-  Schedule sch = sol;
-
+Schedule EDFScheduler(Schedule sch) {
   int task_num = sch.tasks.size();
   std::vector<int> exec_time(task_num);
   std::vector<int> deadline(task_num);

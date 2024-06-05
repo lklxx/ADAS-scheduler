@@ -12,7 +12,7 @@ public:
 
   void parse_input_data(std::string input_data) {
     std::ifstream ifs(input_data);
-    ifs >> curr_sol.core_num;
+    ifs >> curr_sch.core_num;
 
     int task_num;
     ifs >> task_num;
@@ -21,7 +21,7 @@ public:
       t.index = i;
       ifs >> t.core >> t.release >> t.offset
           >> t.time >> t.period >> t.deadline >> t.jitter;
-      curr_sol.tasks.push_back(t);
+      curr_sch.tasks.push_back(t);
     }
 
     int task_chain_num;
@@ -33,20 +33,20 @@ public:
       for (int j = 0; j < task_num; j++) {
         int task_id;
 	ifs >> task_id;
-	tc.tasks.push_back(curr_sol.tasks[task_id]);
+	tc.tasks.push_back(curr_sch.tasks[task_id]);
       }
       ifs >> tc.deadline >> tc.priority;
-      curr_sol.task_chains.push_back(tc);
+      curr_sch.task_chains.push_back(tc);
     }
 
-    print_sol(curr_sol);
-    best_sol = curr_sol;
+    print_sch(curr_sch);
+    best_sch = curr_sch;
   }
 
   template <typename Scheduler>
   void simulated_annealing(Scheduler scheduler, int exec_time) {
-    init_sol();
-    curr_sch = scheduler(curr_sol);
+    init_sch();
+    curr_sch = scheduler(curr_sch);
     calculate_cost(curr_sch);
     best_sch = curr_sch;
   }
@@ -70,50 +70,50 @@ public:
     std::cout << "], " << tc.deadline << ", " << tc.priority << ")\n";
   }
 
-  void print_sol(Solution &sol) {
+  void print_sch(Schedule &sch) {
     std::cout << "Tasks:\n";
-    for (auto t : sol.tasks) {
+    for (auto t : sch.tasks) {
       print_task(t);
     }
     std::cout << "\nTask Chains:\n";
-    for (auto tc : sol.task_chains) {
+    for (auto tc : sch.task_chains) {
       print_task_chain(tc);
     }
-    std::cout << "\nhyper period: " << sol.hyper_period;
-    std::cout << "\nmax offset: " << sol.max_offset << "\n\n";
+    std::cout << "\nhyper period: " << sch.hyper_period;
+    std::cout << "\nmax offset: " << sch.max_offset << "\n\n";
   }
 
 private:
-  void init_sol() {
-    curr_sol.hyper_period = 1;
-    curr_sol.max_offset = 0;
-    for (auto &t : curr_sol.tasks) {
-      curr_sol.hyper_period = std::lcm(curr_sol.hyper_period, t.period);
-      curr_sol.max_offset = std::max(curr_sol.max_offset, t.offset);
+  void init_sch() {
+    curr_sch.hyper_period = 1;
+    curr_sch.max_offset = 0;
+    for (auto &t : curr_sch.tasks) {
+      curr_sch.hyper_period = std::lcm(curr_sch.hyper_period, t.period);
+      curr_sch.max_offset = std::max(curr_sch.max_offset, t.offset);
       t.sch_core = t.core;
       t.sch_offset = t.offset;
       t.sch_deadline = t.deadline;
     }
 
-    std::vector<int> core_util(curr_sol.core_num, 0);
-    for (auto &t : curr_sol.tasks) {
+    std::vector<int> core_util(curr_sch.core_num, 0);
+    for (auto &t : curr_sch.tasks) {
       if (t.sch_core == -1) {
         continue;
       }
-      core_util[t.sch_core] += t.time * (curr_sol.hyper_period / t.period);
-      assert(core_util[t.sch_core] <= curr_sol.hyper_period);
+      core_util[t.sch_core] += t.time * (curr_sch.hyper_period / t.period);
+      assert(core_util[t.sch_core] <= curr_sch.hyper_period);
     }
-    for (auto &t : curr_sol.tasks) {
+    for (auto &t : curr_sch.tasks) {
       if (t.sch_core != -1) {
         continue;
       }
       int min_util_core = std::distance(std::begin(core_util),
                                         std::ranges::min_element(core_util));
       t.sch_core = min_util_core;
-      core_util[min_util_core] += t.time * (curr_sol.hyper_period / t.period);
+      core_util[min_util_core] += t.time * (curr_sch.hyper_period / t.period);
     }
 
-    print_sol(curr_sol);
+    print_sch(curr_sch);
   }
 
   void calculate_cost(Schedule &sch) {
@@ -253,7 +253,6 @@ private:
   }
 
 private:
-  Solution curr_sol, best_sol;
   Schedule curr_sch, best_sch;
   float w1 = 10000;
   float w2 = 40000;
