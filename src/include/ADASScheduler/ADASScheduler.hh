@@ -2,6 +2,7 @@
 #include <climits>
 #include <fstream>
 #include <numeric>
+#include <random>
 
 #include "sa.hh"
 #include "schedule.hh"
@@ -252,10 +253,38 @@ private:
     }
   }
 
+  static Schedule adjust_deadline(Schedule &sch) {
+    Schedule new_sch;
+    return new_sch;
+  }
+
+  static Schedule swap_tasks(Schedule &sch) {
+    Schedule new_sch;
+    return new_sch;
+  }
+
+  static Schedule adjust_offset(Schedule &sch) {
+    Schedule new_sch;
+    return new_sch;
+  }
+
+  Schedule generate_neighbor(Schedule &sch) {
+    static std::knuth_b rand_engine;
+    static std::uniform_int_distribution<int> rand_method(0, methods.size() - 1);
+    int method = rand_method(rand_engine);
+    return methods[method](sch);
+  }
+
 private:
   Schedule curr_sch, best_sch;
   float w1 = 10000;
   float w2 = 40000;
   float w3 = 10000;
   float w4 = 60000;
+  using Method = Schedule(*)(Schedule&);
+  std::array<Method, 3> methods = {
+    &adjust_deadline,
+    &swap_tasks,
+    &adjust_offset
+  };
 };
