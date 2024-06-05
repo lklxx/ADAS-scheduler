@@ -304,7 +304,33 @@ private:
   }
 
   static Schedule adjust_offset(Schedule &sch) {
-    Schedule new_sch;
+    Schedule new_sch = sch;
+    int max_violations = 0;
+    for (int core = 0; core < new_sch.core_num; core++) {
+      if (new_sch.core_violations[core] > max_violations) {
+        max_violations = new_sch.core_violations[core];
+      }
+    }
+    std::vector<int> candidate_core;
+    for (int core = 0; core < new_sch.core_num; core++) {
+      if (new_sch.core_violations[core] == max_violations) {
+        candidate_core.push_back(core);
+      }
+    }
+    int core = candidate_core[rand_num(0, candidate_core.size() - 1)];
+    std::vector<int> candidate_tid;
+    for (auto t : new_sch.tasks) {
+      if (t.sch_core == core) {
+        candidate_tid.push_back(t.index);
+      }
+    }
+    int tid = candidate_tid[rand_num(0, candidate_tid.size() - 1)];
+    int orig_offset = new_sch.tasks[tid].sch_offset;
+    int min_offset = new_sch.tasks[tid].release;
+    int max_offset = new_sch.tasks[tid].deadline - new_sch.tasks[tid].time;
+    while (new_sch.tasks[tid].sch_offset == orig_offset) {
+      new_sch.tasks[tid].sch_offset = rand_num(min_offset, max_offset);
+    }
     return new_sch;
   }
 
