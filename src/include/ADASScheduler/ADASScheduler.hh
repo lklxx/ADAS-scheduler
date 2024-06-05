@@ -45,8 +45,9 @@ public:
   template <typename Scheduler>
   void simulated_annealing(Scheduler scheduler, int exec_time) {
     init_sol();
-    curr_sch = best_sch = scheduler(curr_sol);
+    curr_sch = scheduler(curr_sol);
     calculate_cost(curr_sch);
+    best_sch = curr_sch;
   }
 
   void output_result(std::string output_file) {
