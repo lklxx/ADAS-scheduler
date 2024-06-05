@@ -264,7 +264,20 @@ private:
   }
 
   static Schedule adjust_deadline(Schedule &sch) {
-    Schedule new_sch;
+    Schedule new_sch = sch;
+    std::vector<int> candidate_tid;
+    for (auto t : new_sch.tasks) {
+      if (t.sch_jitter > 0) {
+        candidate_tid.push_back(t.index);
+      }
+    }
+    int tid = candidate_tid[rand_num(0, candidate_tid.size() - 1)];
+    int orig_deadline = new_sch.tasks[tid].sch_deadline;
+    int min_deadline = 0; // Does this work?
+    int max_deadline = new_sch.tasks[tid].deadline;
+    while (new_sch.tasks[tid].sch_deadline == orig_deadline) {
+      new_sch.tasks[tid].sch_deadline = rand_num(min_deadline, max_deadline);
+    }
     return new_sch;
   }
 
@@ -303,6 +316,9 @@ private:
 
   Schedule generate_neighbor(Schedule &sch) {
     int method = rand_num(0, methods.size() - 1);
+    while (sch.jitter_violations == 0 && method == 0) {
+      method = rand_num(0, methods.size() - 1);
+    }
     return reset_sch(methods[method](sch));
   }
 
