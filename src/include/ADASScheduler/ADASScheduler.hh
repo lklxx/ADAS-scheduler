@@ -117,7 +117,7 @@ private:
     print_sch(curr_sch);
   }
 
-  void calculate_cost(Schedule &sch) {
+  float calculate_cost(Schedule &sch) {
     std::vector<Log> task_logs(sch.tasks.size());
 
     for (auto log : sch.logs) {
@@ -247,6 +247,7 @@ private:
     std::cout << "  deadline_tc: " << sch.cost.deadline_tc << std::endl;
     std::cout << "  jitter: " << sch.cost.jitter << std::endl;
     std::cout << "  final_cost: " << sch.cost.final_cost << std::endl;
+    return sch.cost.final_cost;
   }
 
   void sync_tasks(Schedule &sch) {
