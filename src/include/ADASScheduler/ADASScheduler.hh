@@ -128,6 +128,7 @@ private:
       }
     }
 
+    sch.core_violations.assign(sch.core_num, 0);
     for (size_t tid = 0; tid < sch.tasks.size(); tid++) {
       int cur = 0;
       for (auto ts : task_logs[tid]) {
@@ -180,10 +181,12 @@ private:
       if (max > t.deadline) {
         float violation = std::min(max - t.deadline, t.deadline);
         sch.cost.deadline_t += violation / t.deadline / sch.tasks.size();
+        sch.core_violations[t.sch_core]++;
       }
       if (t.sch_jitter > 0) {
         t.sch_jitter = std::min(t.sch_jitter, t.jitter);
         sch.cost.jitter += static_cast<float>(t.sch_jitter) / t.jitter / sch.tasks.size();
+        sch.core_violations[t.sch_core]++;
       }
     }
 

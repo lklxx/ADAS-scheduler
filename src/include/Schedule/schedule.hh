@@ -61,4 +61,5 @@ struct Schedule {
   int hyper_period = -1;	// lcm of periods
   int max_offset = -1;
   std::vector<Log> logs;
+  std::vector<int> core_violations;
 };
