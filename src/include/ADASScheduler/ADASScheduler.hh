@@ -365,6 +365,9 @@ private:
         candidate_tid.push_back(t.index);
       }
     }
+    if (candidate_tid.empty()) {
+      return false;
+    }
     int tid = candidate_tid[rand_num(0, candidate_tid.size() - 1)];
     int orig_offset = new_sch.tasks[tid].sch_offset;
     int min_offset = new_sch.tasks[tid].release;
