@@ -377,6 +377,46 @@ private:
     return true;
   }
 
+  static bool move_task(Schedule &sch) {
+    if (sch.core_num < 2) {
+      return false;
+    }
+    Schedule new_sch = sch;
+    std::vector<int> candidate_tid;
+    for (auto t : new_sch.tasks) {
+      if (t.core == -1) {
+        candidate_tid.push_back(t.index);
+      }
+    }
+    if (candidate_tid.empty()) {
+      return false;
+    }
+    int tid = candidate_tid[rand_num(0, candidate_tid.size() - 1)];
+    int util = new_sch.tasks[tid].time * (new_sch.hyper_period / new_sch.tasks[tid].period);
+    std::vector<int> candidate_core;
+    for (int core = 0; core < new_sch.core_num; core++) {
+      if (core == new_sch.tasks[tid].sch_core) {
+        continue;
+      }
+      int core_util = 0;
+      for (auto t : new_sch.tasks) {
+        if (t.sch_core == core) {
+          core_util += t.time * (new_sch.hyper_period / t.period);
+        }
+      }
+      if (core_util + util <= new_sch.hyper_period) {
+        candidate_core.push_back(core);
+      }
+    }
+    if (candidate_core.empty()) {
+      return false;
+    }
+    int core = candidate_core[rand_num(0, candidate_core.size() - 1)];
+    new_sch.tasks[tid].sch_core = core;
+    sch = new_sch;
+    return true;
+  }
+
   static Schedule reset_sch(Schedule sch) {
     sch.max_offset = 0;
     for (auto &t : sch.tasks) {
@@ -412,9 +452,10 @@ private:
   float w3 = 10000;
   float w4 = 60000;
   using Method = bool(*)(Schedule&);
-  static constexpr std::array<Method, 3> methods = {
+  static constexpr std::array<Method, 4> methods = {
     &adjust_deadline,
     &swap_tasks,
-    &adjust_offset
+    &adjust_offset,
+    &move_task
   };
 };
