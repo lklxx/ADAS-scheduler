@@ -9,9 +9,9 @@ int main(int argc, char *argv[]) {
   parser.add<int>("time", 't', "execution time for simulated annealing", false, 15);
   parser.parse_check(argc, argv);
 
-  ADASScheduler scheduler;
+  ADASScheduler scheduler(EDFScheduler);
   scheduler.parse_input_data(parser.get<std::string>("input"));
-  scheduler.find_optimal_schedule(EDFScheduler, parser.get<int>("time"));
+  scheduler.find_optimal_schedule(parser.get<int>("time"));
   scheduler.output_result(parser.get<std::string>("output"));
 
   return 0;

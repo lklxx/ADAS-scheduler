@@ -8,9 +8,10 @@
 #include "sa.hh"
 #include "schedule.hh"
 
+template <typename Scheduler>
 class ADASScheduler {
 public:
-  ADASScheduler() {}
+  ADASScheduler(Scheduler scheduler) : scheduler(scheduler) {}
 
   void parse_input_data(std::string input_data) {
     std::ifstream ifs(input_data);
@@ -45,11 +46,13 @@ public:
     best_sch = curr_sch;
   }
 
-  template <typename Scheduler>
-  void find_optimal_schedule(Scheduler scheduler, int exec_time) {
+  void find_optimal_schedule(int exec_time) {
     init_sch();
     auto schedule_and_calculate_cost = [&](Schedule& sch) {
       scheduler(sch);
+      //calculate_cost(sch);
+      //sch = post_sch_adjust(sch);
+      //return sch.cost.final_cost;
       return calculate_cost(sch);
     };
     best_sch = simulated_annealing(curr_sch, schedule_and_calculate_cost, generate_neighbor, exec_time);
@@ -279,6 +282,30 @@ private:
     return sch.cost.final_cost;
   }
 
+  Schedule post_sch_adjust(Schedule sch) {
+    auto schedule_and_calculate_cost = [&](Schedule& sch) {
+      scheduler(sch);
+      return calculate_cost(sch);
+    };
+    Schedule orig_sch = sch;
+    for (auto t : sch.tasks) {
+      if (t.sch_jitter > 0) {
+        Schedule new_sch = sch;
+        int tid = t.index;
+        int orig_offset = t.sch_offset;
+        int min_offset = t.release;
+        int max_offset = t.deadline - t.time;
+        while (new_sch.tasks[tid].sch_offset == orig_offset) {
+          new_sch.tasks[tid].sch_offset = rand_num(min_offset, max_offset);
+        }
+        if (schedule_and_calculate_cost(new_sch) < sch.cost.final_cost) {
+          sch = new_sch;
+        }
+      }
+    }
+    return sch.cost.final_cost < orig_sch.cost.final_cost ? sch : orig_sch;
+  }
+
   static void sync_tasks(Schedule &sch) {
     for (auto &tc : sch.task_chains) {
       for (auto &t : tc.tasks) {
@@ -449,6 +476,7 @@ private:
   }
 
 private:
+  Scheduler scheduler;
   Schedule curr_sch, best_sch;
   float w1 = 10000;
   float w2 = 40000;
