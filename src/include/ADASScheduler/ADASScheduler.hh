@@ -41,7 +41,7 @@ public:
       curr_sch.task_chains.push_back(tc);
     }
 
-    print_sch(curr_sch);
+    //print_sch(curr_sch);
     best_sch = curr_sch;
   }
 
@@ -53,8 +53,34 @@ public:
       return calculate_cost(sch);
     };
     best_sch = simulated_annealing(curr_sch, schedule_and_calculate_cost, generate_neighbor, exec_time);
+    //print_logs(best_sch.logs);
+    for (auto t : best_sch.tasks) {
+      std::cout << "Task " << t.index << ":\n";
+      int n = best_sch.hyper_period / t.period;
+      for (int i = 0; i < n; i++) {
+        std::cout << "(" << t.start_time[i]
+                  << ", " << t.finish_time[i] << "), ";
+      }
+      std::cout << std::endl;
+    }
+    for (auto tc : best_sch.task_chains) {
+      std::cout << "Task Chain" << tc.index << ":\n";
+      int n = best_sch.hyper_period / tc.tasks[0].period;
+      for (int i = 0; i < n; i++) {
+        std::cout << "(" << tc.start_time[i]
+                  << ", " << tc.finish_time[i] << "), ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
     visualize_logs(best_sch, std::cout);
-    std::cout << "min cost: " << best_sch.cost.final_cost << std::endl;
+    std::cout << "min cost: " << std::endl;
+    std::cout << "  latency: " << best_sch.cost.latency << std::endl;
+    std::cout << "  deadline_t: " << best_sch.cost.deadline_t << std::endl;
+    std::cout << "  deadline_tc: " << best_sch.cost.deadline_tc << std::endl;
+    std::cout << "  jitter: " << best_sch.cost.jitter << std::endl;
+    std::cout << "  final_cost: " << best_sch.cost.final_cost << std::endl;
+    std::cout << "hyper period: " << best_sch.hyper_period << std::endl;
   }
 
   void output_result(std::string output_file) {
@@ -119,7 +145,7 @@ private:
       core_util[min_util_core] += t.time * (curr_sch.hyper_period / t.period);
     }
 
-    print_sch(curr_sch);
+    //print_sch(curr_sch);
   }
 
   float calculate_cost(Schedule &sch) {
@@ -156,12 +182,14 @@ private:
         cur += exec;
       }
 
+      /*
       std::cout << "Task " << tid << ":\n";
       for (size_t i = 0; i < sch.tasks[tid].start_time.size(); i++) {
         std::cout << "(" << sch.tasks[tid].start_time[i]
                   << ", " << sch.tasks[tid].finish_time[i] << "), ";
       }
       std::cout << std::endl;
+      */
     }
 
     for (auto &t : sch.tasks) {
@@ -221,12 +249,14 @@ private:
         tc.finish_time.push_back(cur);
       }
 
+      /*
       std::cout << "Task Chain " << tc.index << ":\n";
       for (size_t i = 0; i < tc.start_time.size(); i++) {
         std::cout << "(" << tc.start_time[i]
                   << ", " << tc.finish_time[i] << "), ";
       }
       std::cout << std::endl;
+      */
 
       int max_latency = 0;
       for (size_t i = 0; i < tc.start_time.size(); i++) {
@@ -246,12 +276,6 @@ private:
       sch.cost.final_cost *= sch.cost.latency;
     }
 
-    std::cout << "cost: " << std::endl;
-    std::cout << "  latency: " << sch.cost.latency << std::endl;
-    std::cout << "  deadline_t: " << sch.cost.deadline_t << std::endl;
-    std::cout << "  deadline_tc: " << sch.cost.deadline_tc << std::endl;
-    std::cout << "  jitter: " << sch.cost.jitter << std::endl;
-    std::cout << "  final_cost: " << sch.cost.final_cost << std::endl;
     return sch.cost.final_cost;
   }
 

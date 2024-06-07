@@ -20,6 +20,7 @@ T simulated_annealing(T initial_sol, CalculateCost calculate_cost,
   float curr_cost, best_cost;
   curr_sol = best_sol = initial_sol;
   curr_cost = best_cost = calculate_cost(curr_sol);
+  std::cout << "best_cost: " << best_cost << std::endl;
 
   auto start = std::chrono::steady_clock::now();
   while (true) {
@@ -35,6 +36,7 @@ T simulated_annealing(T initial_sol, CalculateCost calculate_cost,
     if (new_cost < best_cost) {
       best_sol = new_sol;
       best_cost = new_cost;
+      std::cout << "best_cost: " << best_cost << std::endl;
     }
 
     if (move_to(new_cost - curr_cost, exec_time - duration.count())) {

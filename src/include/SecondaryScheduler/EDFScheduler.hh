@@ -114,6 +114,6 @@ void EDFScheduler(Schedule &sch) {
     sch.logs.push_back(log);
   }
 
-  print_logs(sch.logs);
-  visualize_logs(sch, std::cout);
+  //print_logs(sch.logs);
+  //visualize_logs(sch, std::cout);
 }
